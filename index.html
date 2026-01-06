@@ -41,14 +41,96 @@
         p {
             font-size: 1.2rem;
             color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .color-button {
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .color-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .color-button:active {
+            transform: translateY(0);
+        }
+
+        body {
+            transition: background 0.5s ease;
+        }
+
+        h1 {
+            transition: color 0.5s ease, background 0.5s ease;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Hello World</h1>
-        <p>Welcome to your first webpage!</p>
+        <h1 id="title">Hello World</h1>
+        <p id="subtitle">Welcome to your first webpage!</p>
+        <button class="color-button" onclick="changeColors()">Change Colors</button>
     </div>
+
+    <script>
+        const colorSchemes = [
+            {
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                textColor: '#333',
+                titleColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            },
+            {
+                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                textColor: '#fff',
+                titleColor: 'linear-gradient(135deg, #fff 0%, #fff 100%)'
+            },
+            {
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                textColor: '#fff',
+                titleColor: 'linear-gradient(135deg, #fff 0%, #fff 100%)'
+            },
+            {
+                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                textColor: '#333',
+                titleColor: 'linear-gradient(135deg, #333 0%, #333 100%)'
+            },
+            {
+                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                textColor: '#333',
+                titleColor: 'linear-gradient(135deg, #333 0%, #333 100%)'
+            },
+            {
+                background: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+                textColor: '#fff',
+                titleColor: 'linear-gradient(135deg, #fff 0%, #fff 100%)'
+            }
+        ];
+
+        let currentColorIndex = 0;
+
+        function changeColors() {
+            currentColorIndex = (currentColorIndex + 1) % colorSchemes.length;
+            const scheme = colorSchemes[currentColorIndex];
+            
+            document.body.style.background = scheme.background;
+            document.getElementById('subtitle').style.color = scheme.textColor;
+            document.getElementById('title').style.background = scheme.titleColor;
+            document.getElementById('title').style.webkitBackgroundClip = 'text';
+            document.getElementById('title').style.webkitTextFillColor = 'transparent';
+            document.getElementById('title').style.backgroundClip = 'text';
+        }
+    </script>
 </body>
 </html>
 
