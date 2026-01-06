@@ -107,6 +107,107 @@
             font-size: 0.95rem;
             color: #666;
         }
+
+        /* DSE Math Calculator */
+        .calc-section {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 2px solid #eee;
+            text-align: left;
+        }
+
+        .calc-title {
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 1rem;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .calc-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            background: #fafafa;
+        }
+
+        .calc-card h3 {
+            margin-bottom: 0.5rem;
+            color: #111827;
+        }
+
+        .calc-label {
+            display: block;
+            margin: 0.5rem 0 0.25rem;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .calc-input {
+            width: 100%;
+            padding: 0.75rem 0.85rem;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .calc-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .calc-buttons {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .calc-btn {
+            padding: 0.6rem 0.9rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .calc-btn.secondary {
+            background: #e5e7eb;
+            color: #111827;
+            box-shadow: none;
+        }
+
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+        }
+
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+
+        .calc-output {
+            margin-top: 0.6rem;
+            background: #111827;
+            color: #e5e7eb;
+            padding: 0.75rem;
+            border-radius: 10px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            min-height: 48px;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -126,6 +227,53 @@
                 <button onclick="resetBall()">Reset Ball</button>
             </div>
             <p class="instructions">Tip: longer drags = more power; angle sets your arc.</p>
+        </div>
+
+        <div class="calc-section">
+            <h2 class="calc-title">DSE Math Calculator</h2>
+            <div class="calc-grid">
+                <div class="calc-card">
+                    <h3>General Calculator</h3>
+                    <label class="calc-label" for="calcExpression">Expression</label>
+                    <input id="calcExpression" class="calc-input" placeholder="e.g. 3*(5+2)^2 / 7" />
+                    <div class="calc-buttons">
+                        <button class="calc-btn" onclick="evaluateExpression()">Calculate</button>
+                        <button class="calc-btn secondary" onclick="clearExpression()">Clear</button>
+                    </div>
+                    <div class="calc-output" id="calcResult">Result will appear here.</div>
+                </div>
+
+                <div class="calc-card">
+                    <h3>Quadratic Solver</h3>
+                    <label class="calc-label" for="quadA">a</label>
+                    <input id="quadA" class="calc-input" type="number" value="1" step="any" />
+                    <label class="calc-label" for="quadB">b</label>
+                    <input id="quadB" class="calc-input" type="number" value="0" step="any" />
+                    <label class="calc-label" for="quadC">c</label>
+                    <input id="quadC" class="calc-input" type="number" value="0" step="any" />
+                    <div class="calc-buttons">
+                        <button class="calc-btn" onclick="solveQuadratic()">Solve</button>
+                    </div>
+                    <div class="calc-output" id="quadResult">Roots and discriminant will appear here.</div>
+                </div>
+
+                <div class="calc-card">
+                    <h3>Combinatorics & Percent</h3>
+                    <label class="calc-label" for="combN">n (items)</label>
+                    <input id="combN" class="calc-input" type="number" value="5" />
+                    <label class="calc-label" for="combR">r (choose)</label>
+                    <input id="combR" class="calc-input" type="number" value="2" />
+                    <label class="calc-label" for="percentBase">Base value</label>
+                    <input id="percentBase" class="calc-input" type="number" value="100" step="any" />
+                    <label class="calc-label" for="percentChange">% change (use negative for decrease)</label>
+                    <input id="percentChange" class="calc-input" type="number" value="10" step="any" />
+                    <div class="calc-buttons">
+                        <button class="calc-btn" onclick="computeCombinatorics()">nCr / nPr</button>
+                        <button class="calc-btn secondary" onclick="computePercentChange()">% Change</button>
+                    </div>
+                    <div class="calc-output" id="combResult">Results will appear here.</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -374,6 +522,135 @@
         updateScoreboard();
         render();
         requestAnimationFrame(gameLoop);
+
+        // -----------------------
+        // DSE Math Calculator
+        // -----------------------
+        function formatNumber(value) {
+            if (!isFinite(value)) return '∞';
+            const abs = Math.abs(value);
+            if (abs !== 0 && (abs < 0.001 || abs > 1e6)) {
+                return value.toExponential(4);
+            }
+            return Number(value.toFixed(6)).toString();
+        }
+
+        function safeEval(expression) {
+            const allowed = /^[0-9+\-*/%^().\s]+$/;
+            if (!allowed.test(expression)) {
+                throw new Error('Use digits, + - * / % ^ ( ) only.');
+            }
+            // Convert ^ to ** for exponent
+            const sanitized = expression.replace(/\^/g, '**');
+            // eslint-disable-next-line no-new-func
+            return Function(`"use strict"; return (${sanitized});`)();
+        }
+
+        function evaluateExpression() {
+            const exprInput = document.getElementById('calcExpression');
+            const output = document.getElementById('calcResult');
+            const raw = (exprInput.value || '').trim();
+            if (!raw) {
+                output.textContent = 'Enter an expression, e.g. 3*(5+2)^2 / 7';
+                return;
+            }
+            try {
+                const result = safeEval(raw);
+                output.textContent = `Result: ${formatNumber(result)}`;
+            } catch (err) {
+                output.textContent = `Error: ${err.message}`;
+            }
+        }
+
+        function clearExpression() {
+            document.getElementById('calcExpression').value = '';
+            document.getElementById('calcResult').textContent = 'Result will appear here.';
+        }
+
+        function factorial(n) {
+            if (!Number.isInteger(n) || n < 0) throw new Error('n must be a non-negative integer');
+            if (n > 170) throw new Error('n is too large ( >170 )');
+            let res = 1;
+            for (let i = 2; i <= n; i++) res *= i;
+            return res;
+        }
+
+        function nPr(n, r) {
+            if (r > n) throw new Error('r cannot exceed n');
+            return factorial(n) / factorial(n - r);
+        }
+
+        function nCr(n, r) {
+            if (r > n) throw new Error('r cannot exceed n');
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        function computeCombinatorics() {
+            const n = Number(document.getElementById('combN').value);
+            const r = Number(document.getElementById('combR').value);
+            const output = document.getElementById('combResult');
+            try {
+                if (!Number.isInteger(n) || !Number.isInteger(r)) {
+                    throw new Error('n and r must be integers');
+                }
+                if (n < 0 || r < 0) throw new Error('n and r must be non-negative');
+                const comb = nCr(n, r);
+                const perm = nPr(n, r);
+                output.textContent = `nCr: ${formatNumber(comb)} | nPr: ${formatNumber(perm)}`;
+            } catch (err) {
+                output.textContent = `Error: ${err.message}`;
+            }
+        }
+
+        function computePercentChange() {
+            const base = Number(document.getElementById('percentBase').value);
+            const change = Number(document.getElementById('percentChange').value);
+            const output = document.getElementById('combResult');
+            if (!isFinite(base) || !isFinite(change)) {
+                output.textContent = 'Enter valid numbers for base and % change.';
+                return;
+            }
+            const result = base * (1 + change / 100);
+            output.textContent = `After ${change}% change: ${formatNumber(result)}`;
+        }
+
+        function solveQuadratic() {
+            const a = Number(document.getElementById('quadA').value);
+            const b = Number(document.getElementById('quadB').value);
+            const c = Number(document.getElementById('quadC').value);
+            const output = document.getElementById('quadResult');
+
+            if (!isFinite(a) || !isFinite(b) || !isFinite(c)) {
+                output.textContent = 'Enter numeric values for a, b, and c.';
+                return;
+            }
+
+            if (a === 0) {
+                if (b === 0) {
+                    output.textContent = c === 0 ? 'Infinite solutions.' : 'No solution.';
+                    return;
+                }
+                const root = -c / b;
+                output.textContent = `Linear equation. Root: x = ${formatNumber(root)}`;
+                return;
+            }
+
+            const disc = b * b - 4 * a * c;
+            if (disc > 0) {
+                const sqrtD = Math.sqrt(disc);
+                const x1 = (-b + sqrtD) / (2 * a);
+                const x2 = (-b - sqrtD) / (2 * a);
+                output.textContent = `Discriminant: ${formatNumber(disc)}\nRoots: x₁ = ${formatNumber(x1)}, x₂ = ${formatNumber(x2)}`;
+            } else if (disc === 0) {
+                const x = -b / (2 * a);
+                output.textContent = `Discriminant: 0\nRepeated root: x = ${formatNumber(x)}`;
+            } else {
+                const sqrtD = Math.sqrt(-disc);
+                const real = -b / (2 * a);
+                const imag = sqrtD / (2 * a);
+                output.textContent = `Discriminant: ${formatNumber(disc)} (negative)\nComplex roots: ${formatNumber(real)} ± ${formatNumber(imag)}i`;
+            }
+        }
     </script>
 </body>
 </html>
