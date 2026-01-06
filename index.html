@@ -309,6 +309,24 @@
                     </div>
                     <div class="calc-output" id="simResult">Solutions x, y will appear here.</div>
                 </div>
+
+                <div class="calc-card">
+                    <h3>Cubic Equation Solver (一元三次方程)</h3>
+                    <p style="margin: 0 0 0.5rem; color: #4b5563; font-weight: 600;">Solve ax³ + bx² + cx + d = 0</p>
+                    <label class="calc-label" for="cubicA">a</label>
+                    <input id="cubicA" class="calc-input" type="number" value="1" step="any" />
+                    <label class="calc-label" for="cubicB">b</label>
+                    <input id="cubicB" class="calc-input" type="number" value="-6" step="any" />
+                    <label class="calc-label" for="cubicC">c</label>
+                    <input id="cubicC" class="calc-input" type="number" value="11" step="any" />
+                    <label class="calc-label" for="cubicD">d</label>
+                    <input id="cubicD" class="calc-input" type="number" value="-6" step="any" />
+                    <div class="calc-buttons" style="margin-top: 1rem;">
+                        <button class="calc-btn" onclick="solveCubic()">Solve</button>
+                        <button class="calc-btn secondary" onclick="clearCubic()">Clear</button>
+                    </div>
+                    <div class="calc-output" id="cubicResult">Roots will appear here.</div>
+                </div>
             </div>
         </div>
     </div>
@@ -648,6 +666,121 @@
             }
             const result = base * (1 + change / 100);
             output.textContent = `After ${change}% change: ${formatNumber(result)}`;
+        }
+
+        function cubicDiscriminant(a, b, c, d) {
+            // Disc for ax^3 + bx^2 + cx + d
+            const delta0 = b * b - 3 * a * c;
+            const delta1 = 2 * b * b * b - 9 * a * b * c + 27 * a * a * d;
+            return delta1 * delta1 - 4 * delta0 * delta0 * delta0;
+        }
+
+        function solveCubic() {
+            const a = Number(document.getElementById('cubicA').value);
+            const b = Number(document.getElementById('cubicB').value);
+            const c = Number(document.getElementById('cubicC').value);
+            const d = Number(document.getElementById('cubicD').value);
+            const output = document.getElementById('cubicResult');
+
+            if (![a, b, c, d].every(Number.isFinite)) {
+                output.textContent = 'Enter numeric values for all coefficients.';
+                return;
+            }
+
+            if (a === 0) {
+                // Fallback to quadratic / linear
+                if (b === 0) {
+                    if (c === 0) {
+                        output.textContent = d === 0 ? 'Infinite solutions.' : 'No solution.';
+                    } else {
+                        const root = -d / c;
+                        output.textContent = `Linear: root x = ${formatNumber(root)}`;
+                    }
+                } else {
+                    // Quadratic bx^2 + cx + d = 0
+                    const disc = c * c - 4 * b * d;
+                    if (disc >= 0) {
+                        const sqrtD = Math.sqrt(disc);
+                        const x1 = (-c + sqrtD) / (2 * b);
+                        const x2 = (-c - sqrtD) / (2 * b);
+                        output.textContent = `Quadratic roots: ${formatNumber(x1)}, ${formatNumber(x2)}`;
+                    } else {
+                        const sqrtD = Math.sqrt(-disc);
+                        const real = -c / (2 * b);
+                        const imag = sqrtD / (2 * b);
+                        output.textContent = `Quadratic complex roots: ${formatNumber(real)} ± ${formatNumber(imag)}i`;
+                    }
+                }
+                return;
+            }
+
+            // Normalize to monic: x^3 + px^2 + qx + r = 0
+            const p = b / a;
+            const q = c / a;
+            const r = d / a;
+
+            // Depressed cubic: t^3 + pt + q
+            const a2 = p;
+            const a1 = q;
+            const a0 = r;
+            const shift = a2 / 3;
+            const pDep = a1 - (a2 * a2) / 3;
+            const qDep = (2 * a2 * a2 * a2) / 27 - (a2 * a1) / 3 + a0;
+
+            const disc = (qDep * qDep) / 4 + (pDep * pDep * pDep) / 27;
+
+            function formatComplex(real, imag) {
+                if (Math.abs(imag) < 1e-10) return formatNumber(real);
+                const sign = imag >= 0 ? '+' : '-';
+                return `${formatNumber(real)} ${sign} ${formatNumber(Math.abs(imag))}i`;
+            }
+
+            let roots = [];
+
+            if (disc > 0) {
+                // One real, two complex
+                const sqrtDisc = Math.sqrt(disc);
+                const u = Math.cbrt(-qDep / 2 + sqrtDisc);
+                const v = Math.cbrt(-qDep / 2 - sqrtDisc);
+                const realRoot = u + v - shift;
+
+                const realPart = -(u + v) / 2 - shift;
+                const imagPart = (u - v) * Math.sqrt(3) / 2;
+                roots = [
+                    formatNumber(realRoot),
+                    formatComplex(realPart, imagPart),
+                    formatComplex(realPart, -imagPart)
+                ];
+            } else if (Math.abs(disc) < 1e-12) {
+                // Triple or double root
+                const u = Math.cbrt(-qDep / 2);
+                const root1 = 2 * u - shift;
+                const root2 = -u - shift;
+                roots = [
+                    formatNumber(root1),
+                    formatNumber(root2),
+                    formatNumber(root2)
+                ];
+            } else {
+                // Three real roots
+                const phi = Math.acos(-qDep / 2 / Math.sqrt(-(pDep * pDep * pDep) / 27));
+                const m = 2 * Math.sqrt(-pDep / 3);
+                const r1 = m * Math.cos(phi / 3) - shift;
+                const r2 = m * Math.cos((phi + 2 * Math.PI) / 3) - shift;
+                const r3 = m * Math.cos((phi + 4 * Math.PI) / 3) - shift;
+                roots = [formatNumber(r1), formatNumber(r2), formatNumber(r3)];
+            }
+
+            const delta = cubicDiscriminant(a, b, c, d);
+            output.textContent = `Roots: ${roots.join(', ')} | discriminant Δ = ${formatNumber(delta)}`;
+        }
+
+        function clearCubic() {
+            document.getElementById('cubicA').value = 1;
+            document.getElementById('cubicB').value = -6;
+            document.getElementById('cubicC').value = 11;
+            document.getElementById('cubicD').value = -6;
+            document.getElementById('cubicResult').textContent = 'Roots will appear here.';
         }
 
         function solveSimultaneous() {
