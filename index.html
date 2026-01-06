@@ -273,6 +273,42 @@
                     </div>
                     <div class="calc-output" id="combResult">Results will appear here.</div>
                 </div>
+
+                <div class="calc-card">
+                    <h3>Simultaneous Equations (聯立方程)</h3>
+                    <p style="margin: 0 0 0.5rem; color: #4b5563; font-weight: 600;">Solve ax + by + c = 0 and dx + ey + f = 0</p>
+                    <div class="calc-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem;">
+                        <div>
+                            <label class="calc-label" for="simA">a</label>
+                            <input id="simA" class="calc-input" type="number" value="1" step="any" />
+                        </div>
+                        <div>
+                            <label class="calc-label" for="simB">b</label>
+                            <input id="simB" class="calc-input" type="number" value="2" step="any" />
+                        </div>
+                        <div>
+                            <label class="calc-label" for="simC">c</label>
+                            <input id="simC" class="calc-input" type="number" value="3" step="any" />
+                        </div>
+                        <div>
+                            <label class="calc-label" for="simD">d</label>
+                            <input id="simD" class="calc-input" type="number" value="4" step="any" />
+                        </div>
+                        <div>
+                            <label class="calc-label" for="simE">e</label>
+                            <input id="simE" class="calc-input" type="number" value="5" step="any" />
+                        </div>
+                        <div>
+                            <label class="calc-label" for="simF">f</label>
+                            <input id="simF" class="calc-input" type="number" value="6" step="any" />
+                        </div>
+                    </div>
+                    <div class="calc-buttons" style="margin-top: 1rem;">
+                        <button class="calc-btn" onclick="solveSimultaneous()">Solve</button>
+                        <button class="calc-btn secondary" onclick="clearSimultaneous()">Clear</button>
+                    </div>
+                    <div class="calc-output" id="simResult">Solutions x, y will appear here.</div>
+                </div>
             </div>
         </div>
     </div>
@@ -612,6 +648,48 @@
             }
             const result = base * (1 + change / 100);
             output.textContent = `After ${change}% change: ${formatNumber(result)}`;
+        }
+
+        function solveSimultaneous() {
+            const a = Number(document.getElementById('simA').value);
+            const b = Number(document.getElementById('simB').value);
+            const c = Number(document.getElementById('simC').value);
+            const d = Number(document.getElementById('simD').value);
+            const e = Number(document.getElementById('simE').value);
+            const f = Number(document.getElementById('simF').value);
+            const output = document.getElementById('simResult');
+
+            if (![a, b, c, d, e, f].every(Number.isFinite)) {
+                output.textContent = 'Enter numeric values for all coefficients.';
+                return;
+            }
+
+            const det = a * e - b * d;
+            if (det === 0) {
+                const altDetX = (-c) * e - b * (-f);
+                const altDetY = a * (-f) - (-c) * d;
+                if (altDetX === 0 && altDetY === 0) {
+                    output.textContent = 'Infinite solutions (dependent equations).';
+                } else {
+                    output.textContent = 'No solution (inconsistent equations).';
+                }
+                return;
+            }
+
+            // System: ax + by = -c and dx + ey = -f
+            const x = ((-c) * e - b * (-f)) / det;
+            const y = (a * (-f) - (-c) * d) / det;
+            output.textContent = `x = ${formatNumber(x)}, y = ${formatNumber(y)} | det = ${formatNumber(det)}`;
+        }
+
+        function clearSimultaneous() {
+            document.getElementById('simA').value = 1;
+            document.getElementById('simB').value = 2;
+            document.getElementById('simC').value = 3;
+            document.getElementById('simD').value = 4;
+            document.getElementById('simE').value = 5;
+            document.getElementById('simF').value = 6;
+            document.getElementById('simResult').textContent = 'Solutions x, y will appear here.';
         }
 
         function solveQuadratic() {
